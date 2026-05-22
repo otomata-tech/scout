@@ -1,16 +1,40 @@
 <script setup lang="ts">
-import { RouterView } from "vue-router";
+import { computed } from "vue";
+import { RouterView, useRoute } from "vue-router";
 import type { MissionConfig } from "../core/types";
 import DashboardLayout from "./DashboardLayout.vue";
 
-defineProps<{ mission: MissionConfig }>();
+const props = defineProps<{ mission: MissionConfig }>();
+const route = useRoute();
+
+/**
+ * Build breadcrumbs from the current route.
+ * Missions can override via their own pages, but this gives a sensible default.
+ */
+const crumbs = computed<string[]>(() => {
+  const match = props.mission.navItems.find((n) => {
+    if (n.path === "/") return route.path === "/";
+    return route.path.startsWith(n.path);
+  });
+  const base = match?.label ?? route.name?.toString() ?? "";
+  if (route.params.id) return [base, `#${route.params.id}`];
+  if (route.params.siren) return [base, `${route.params.siren}`];
+  return [base];
+});
 </script>
 
 <template>
   <DashboardLayout
-    :nav-items="mission.navItems"
-    :branding="mission.branding"
+    :mission="mission"
+    :breadcrumbs="crumbs"
+    search-placeholder="Search deals, accounts, contacts…"
   >
+    <template #sidebar-switcher>
+      <slot name="sidebar-switcher" />
+    </template>
+    <template #sidebar-footer>
+      <slot name="sidebar-footer" />
+    </template>
     <template #header-actions>
       <slot name="header-actions" />
     </template>

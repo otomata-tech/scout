@@ -15,6 +15,15 @@ export function loadMissionTheme(href: string | undefined): void {
   document.head.appendChild(link);
 }
 
+/**
+ * Set the [data-theme="<id>"] attribute on the root element so the mission's
+ * theme.css (which scopes via `[data-theme="<id>"] { ... }`) cascades.
+ * Switching missions = re-call this with a different id.
+ */
+export function applyThemeAttribute(themeId: string): void {
+  document.documentElement.setAttribute("data-theme", themeId);
+}
+
 export function applyBranding(opts: { name?: string; faviconUrl?: string }): void {
   if (opts.name) document.title = opts.name;
   if (opts.faviconUrl) {

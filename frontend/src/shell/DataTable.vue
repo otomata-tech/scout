@@ -1,16 +1,16 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
-import { cn } from "../lib/utils";
-
 export interface ColumnDef<T> {
   key: string;
   label: string;
-  /** "right" pour numeric / "left" par défaut */
+  /** "r" for numeric/right-aligned, else left. */
   align?: "left" | "right";
-  /** "font-mono" / "text-muted-foreground" — classes appliquées sur td */
+  /** "mute" applies muted-foreground color; "mono" applies monospace; combine via space. */
   cellClass?: string;
-  /** Width hint, e.g. "w-32" */
+  /** Inline width style (e.g. "26%" or "90px"). */
+  width?: string;
+  /** Tailwind width class (e.g. "w-32") — legacy, alias for width. */
   widthClass?: string;
-  /** Custom renderer; returns string ("—" si null) */
+  /** Custom renderer; returns a string. Falls back to row[key] → "—". */
   format?: (row: T) => string;
 }
 
@@ -18,56 +18,63 @@ const props = defineProps<{
   columns: ColumnDef<T>[];
   rows: T[];
   rowKey: (row: T) => string;
+  /** Currently active row (highlighted). */
+  activeKey?: string;
   emptyMessage?: string;
   loading?: boolean;
+  /** Show numbered index column on the left. */
+  indexed?: boolean;
 }>();
 
-defineEmits<{ "row-click": [row: T] }>();
+defineEmits<{ "row-click": [row: T]; "row-hover": [row: T] }>();
 
 function cellValue(row: T, col: ColumnDef<T>): string {
   if (col.format) return col.format(row);
   const v = (row as Record<string, unknown>)[col.key];
-  return v == null ? "—" : String(v);
+  return v == null || v === "" ? "—" : String(v);
 }
 </script>
 
 <template>
-  <div class="overflow-x-auto border border-border rounded-lg bg-card">
-    <table class="w-full text-sm">
-      <thead class="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+  <div class="tblcard">
+    <table class="tbl">
+      <thead>
         <tr>
           <th
             v-for="col in columns"
             :key="col.key"
-            :class="cn(
-              'px-3 py-2',
-              col.align === 'right' ? 'text-right' : 'text-left',
-              col.widthClass
-            )"
+            :class="col.align === 'right' ? 'r' : ''"
+            :style="col.width ? { width: col.width } : undefined"
           >{{ col.label }}</th>
         </tr>
       </thead>
       <tbody>
         <tr
-          v-for="row in rows"
+          v-for="(row, i) in rows"
           :key="rowKey(row)"
-          class="border-t border-border hover:bg-muted/30 cursor-pointer"
+          :class="activeKey === rowKey(row) ? 'active' : ''"
+          @mouseenter="$emit('row-hover', row)"
           @click="$emit('row-click', row)"
         >
           <td
-            v-for="col in columns"
+            v-for="(col, ci) in columns"
             :key="col.key"
-            :class="cn(
-              'px-3 py-2',
-              col.align === 'right' ? 'text-right' : 'text-left',
-              col.cellClass ?? 'text-foreground'
-            )"
-          >{{ cellValue(row, col) }}</td>
+            :class="[col.align === 'right' ? 'r' : '', col.cellClass ?? '']"
+          >
+            <template v-if="indexed && ci === 0">
+              <span class="lead">
+                <span class="ix">{{ String(i + 1).padStart(2, "0") }}</span>
+                {{ cellValue(row, col) }}
+              </span>
+            </template>
+            <template v-else>{{ cellValue(row, col) }}</template>
+          </td>
         </tr>
         <tr v-if="!loading && !rows.length">
-          <td :colspan="columns.length" class="px-3 py-10 text-center text-muted-foreground">
-            {{ emptyMessage ?? "Aucun résultat" }}
-          </td>
+          <td
+            :colspan="columns.length"
+            style="text-align: center; color: var(--scout-mute); padding: 40px 12px;"
+          >{{ emptyMessage ?? "Aucun résultat" }}</td>
         </tr>
       </tbody>
     </table>

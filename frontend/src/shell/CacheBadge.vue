@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { cn, ageLabel } from "../lib/utils";
+import { Icon } from "./Icons";
+import { ageLabel } from "../lib/utils";
 
 defineProps<{
   hit?: boolean;
@@ -11,16 +12,13 @@ defineEmits<{ refresh: [] }>();
 </script>
 
 <template>
-  <div class="flex items-center gap-3 text-xs">
-    <span v-if="ageSeconds != null" class="font-mono text-muted-foreground">
-      <span :class="cn(hit ? 'text-success' : 'text-warning')">●</span>
-      data {{ ageLabel(ageSeconds) }}
+  <div class="sync" style="display:flex; align-items:center; gap:8px;">
+    <span v-if="ageSeconds != null" :class="hit ? 'ok' : 'warn'" style="font-family: var(--scout-font-mono); font-size: 12px;">
+      ● data {{ ageLabel(ageSeconds) }}
     </span>
-    <button
-      type="button"
-      :disabled="loading"
-      @click="$emit('refresh')"
-      class="px-2.5 py-1 rounded border border-border bg-card hover:bg-accent disabled:opacity-40 transition-colors"
-    >{{ loading ? "…" : "Refresh" }}</button>
+    <button class="btn btn-ghost btn-sm" :disabled="loading" @click="$emit('refresh')">
+      <Icon name="refresh" />
+      <span>{{ loading ? "syncing…" : "Refresh" }}</span>
+    </button>
   </div>
 </template>

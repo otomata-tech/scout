@@ -1,18 +1,34 @@
 <script setup lang="ts">
+import { Icon } from "./Icons";
+
 defineProps<{
-  title?: string;
-  subtitle?: string;
+  /** Mission display name (left-most crumb) */
+  missionName?: string;
+  /** Trailing breadcrumbs (last one is highlighted) */
+  breadcrumbs?: string[];
+  /** Optional command bar placeholder (⌘K). Hidden when empty. */
+  searchPlaceholder?: string;
 }>();
 </script>
 
 <template>
-  <header class="h-14 px-6 border-b border-border bg-background flex items-center justify-between gap-4">
-    <div class="min-w-0">
-      <h1 v-if="title" class="text-base font-semibold tracking-tight truncate">{{ title }}</h1>
-      <p v-if="subtitle" class="text-xs text-muted-foreground truncate">{{ subtitle }}</p>
+  <header class="scout-head">
+    <div class="crumbs">
+      <span v-if="missionName">{{ missionName }}</span>
+      <template v-for="(b, i) in breadcrumbs ?? []" :key="i">
+        <span>/</span>
+        <span :class="i === (breadcrumbs?.length ?? 0) - 1 ? 'here' : ''">{{ b }}</span>
+      </template>
     </div>
-    <div class="flex items-center gap-2 shrink-0">
-      <slot name="actions" />
+
+    <div v-if="searchPlaceholder !== ''" class="cmdbar">
+      <Icon name="search" />
+      <span>{{ searchPlaceholder ?? "Search…" }}</span>
+      <span class="kbd">⌘ K</span>
+    </div>
+
+    <div class="actions">
+      <slot />
     </div>
   </header>
 </template>
