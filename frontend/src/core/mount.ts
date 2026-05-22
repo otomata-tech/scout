@@ -1,5 +1,5 @@
-import { createApp } from "vue";
-import { createRouter, createWebHistory } from "vue-router";
+import { createApp, type App } from "vue";
+import { createRouter, createWebHistory, type Router } from "vue-router";
 import type { MissionConfig } from "./types";
 import { applyBranding, loadMissionTheme, applyThemeAttribute } from "./theme";
 import ShellApp from "../shell/ShellApp.vue";
@@ -11,17 +11,27 @@ export interface MountOptions {
   density?: "compact" | "default" | "comfortable";
   /** "full" | "rail" — applied to <html data-nav="…">. */
   navMode?: "full" | "rail";
+  /**
+   * Hook called after the router is created but before mount — lets the mission
+   * register a `router.beforeEach` auth guard, install plugins, etc.
+   */
+  beforeMount?: (ctx: { app: App; router: Router }) => void | Promise<void>;
+}
+
+export interface MountResult {
+  app: App;
+  router: Router;
 }
 
 /**
  * Bootstrap a scout-shell app for the given mission.
- * - Loads mission theme.css (which should target [data-theme="<mission.id>"]) and
- *   applies the data-theme attribute on the root element so the cascade kicks in.
- * - Sets document title + favicon.
- * - Builds a vue-router from the mission's routes.
- * - Mounts the shell, passing the mission config.
+ * - Loads mission theme.css (`[data-theme="<mission.id>"]`) + sets the attribute
+ * - Sets document title + favicon
+ * - Builds a vue-router from the mission's routes
+ * - Calls `beforeMount({ app, router })` so the mission can register guards
+ * - Mounts the shell
  */
-export function mountShell(opts: MountOptions) {
+export async function mountShell(opts: MountOptions): Promise<MountResult> {
   loadMissionTheme(opts.mission.themeUrl);
   applyBranding({ name: opts.mission.name, faviconUrl: opts.mission.branding.faviconUrl });
   applyThemeAttribute(opts.mission.id);
@@ -36,6 +46,9 @@ export function mountShell(opts: MountOptions) {
 
   const app = createApp(ShellApp, { mission: opts.mission });
   app.use(router);
+
+  if (opts.beforeMount) await opts.beforeMount({ app, router });
+
   app.mount(opts.el ?? "#app");
-  return app;
+  return { app, router };
 }
