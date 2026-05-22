@@ -51,7 +51,7 @@ function cellValue(row: T, col: ColumnDef<T>): string {
         <tr
           v-for="row in rows"
           :key="rowKey(row)"
-          class="border-t border-border hover:bg-muted/30 cursor-default"
+          class="border-t border-border hover:bg-muted/30 cursor-pointer"
           @click="$emit('row-click', row)"
         >
           <td
