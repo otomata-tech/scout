@@ -20,6 +20,7 @@ interface TokenCache {
 
 export class OAuthClient {
   private cache: TokenCache | null = null;
+  private pendingRefresh: Promise<string> | null = null;
 
   constructor(private readonly config: OAuthRefreshConfig) {}
 
@@ -52,6 +53,9 @@ export class OAuthClient {
 
   async getAccessToken(): Promise<string> {
     if (this.cache && this.cache.expiresAt > Date.now()) return this.cache.accessToken;
-    return this.refresh();
+    if (!this.pendingRefresh) {
+      this.pendingRefresh = this.refresh().finally(() => { this.pendingRefresh = null; });
+    }
+    return this.pendingRefresh;
   }
 }
