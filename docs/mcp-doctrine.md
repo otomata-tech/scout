@@ -108,6 +108,11 @@ Le contexte agent est précieux. Chaque tool doit minimiser sa réponse :
 | Retourner `payload` complet | Facts lourds (5-15 KB) dans les chaînes | `trimForMcp()` |
 | Dupliquer un outil Oto | Clé API manquante sur claude.ai, maintenance double | `add_*` persist-only |
 | Append-only sans dedup | Double appel = 2 facts identiques | Check clé naturelle avant INSERT |
+| Rebuild batch après chaque action agent | 130s pour recalculer 644k clusters | UPDATE incrémental dans le tool qui écrit |
+
+### Matview / tables agrégées
+
+Les tables agrégées (ex `graph.sites`) sont reconstruites par un script batch (Union-Find). **Ne pas rebuilder après chaque action agent.** À la place, les tools d'écriture (ex `log_exploration_attempt`) font un UPDATE ciblé sur la row concernée. Le rebuild batch reste utile uniquement après un gros ingest (import France entière, migration).
 
 ### Transport
 
