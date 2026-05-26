@@ -1,10 +1,13 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
+export type TokenVerifier = (token: string) => Promise<string | null>;
+
 export interface LogtoAuthConfig {
   endpoint: string;          // e.g. https://auth.oto.zone
   audience: string;          // e.g. https://api.<project>.oto.zone
   enabled?: boolean;         // false → dev bypass (request.user = { sub: "dev-bypass" })
+  tokenVerifier?: TokenVerifier; // custom token check before JWT (e.g. API keys with prefix)
 }
 
 declare module "fastify" {
@@ -36,12 +39,23 @@ export function makeAuthPreHandler(config: LogtoAuthConfig) {
   const jwks = createRemoteJWKSet(new URL(`${config.endpoint}/oidc/jwks`));
   const issuer = `${config.endpoint}/oidc`;
 
+  const { tokenVerifier } = config;
+
   return async (request: FastifyRequest, reply: FastifyReply) => {
     const auth = request.headers.authorization;
     if (!auth?.startsWith("Bearer ")) {
       return reply.code(401).send({ error: "Unauthorized" });
     }
     const token = auth.slice(7);
+
+    if (tokenVerifier) {
+      const sub = await tokenVerifier(token);
+      if (sub) {
+        request.user = { sub };
+        return;
+      }
+    }
+
     try {
       const { payload } = await jwtVerify(token, jwks, {
         issuer,

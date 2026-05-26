@@ -18,6 +18,8 @@ export interface MissionConfig {
   navItems: NavItem[];
   /** Vue Router routes for this mission */
   routes: RouteRecordRaw[];
+  /** Component rendered at the bottom of the sidebar (e.g. user menu / logout) */
+  sidebarFooter?: Component;
 }
 
 export interface BrandingConfig {

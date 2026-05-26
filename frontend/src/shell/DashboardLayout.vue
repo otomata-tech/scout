@@ -12,7 +12,7 @@ defineProps<{
 
 <template>
   <div class="scout-app">
-    <SidebarNav :items="mission.navItems" :branding="mission.branding">
+    <SidebarNav :items="mission.navItems" :branding="mission.branding" :footer-component="mission.sidebarFooter">
       <template #switcher>
         <slot name="sidebar-switcher" />
       </template>
