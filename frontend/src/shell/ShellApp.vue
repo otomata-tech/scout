@@ -12,7 +12,8 @@ const route = useRoute();
  * Missions can override via their own pages, but this gives a sensible default.
  */
 const crumbs = computed<string[]>(() => {
-  const match = props.mission.navItems.find((n) => {
+  const allItems = props.mission.navSections?.flatMap((s) => s.items) ?? props.mission.navItems ?? [];
+  const match = allItems.find((n) => {
     if (n.path === "/") return route.path === "/";
     return route.path.startsWith(n.path);
   });

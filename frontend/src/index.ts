@@ -1,5 +1,5 @@
 // Core
-export type { MissionConfig, BrandingConfig, NavItem, ThemeTokens, IconComponent } from "./core/types";
+export type { MissionConfig, BrandingConfig, NavItem, NavSection, ThemeTokens, IconComponent } from "./core/types";
 export { loadMissionTheme, applyBranding, applyThemeAttribute } from "./core/theme";
 export { mountShell, type MountOptions } from "./core/mount";
 export {

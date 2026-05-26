@@ -24,9 +24,25 @@ const props = defineProps<{
   loading?: boolean;
   /** Show numbered index column on the left. */
   indexed?: boolean;
+  /** Generate an href per row — enables Ctrl+click / middle-click / "open in new tab". */
+  rowHref?: (row: T) => string | undefined;
 }>();
 
-defineEmits<{ "row-click": [row: T]; "row-hover": [row: T] }>();
+const emit = defineEmits<{ "row-click": [row: T]; "row-hover": [row: T] }>();
+
+function onRowClick(e: MouseEvent, row: T) {
+  const href = props.rowHref?.(row);
+  if (href && (e.ctrlKey || e.metaKey)) {
+    window.open(href, "_blank");
+    return;
+  }
+  emit("row-click", row);
+}
+
+function onMiddleClick(row: T) {
+  const href = props.rowHref?.(row);
+  if (href) window.open(href, "_blank");
+}
 
 function cellValue(row: T, col: ColumnDef<T>): string {
   if (col.format) return col.format(row);
@@ -54,7 +70,8 @@ function cellValue(row: T, col: ColumnDef<T>): string {
           :key="rowKey(row)"
           :class="activeKey === rowKey(row) ? 'active' : ''"
           @mouseenter="$emit('row-hover', row)"
-          @click="$emit('row-click', row)"
+          @click="onRowClick($event, row)"
+          @mousedown.middle.prevent="onMiddleClick(row)"
         >
           <td
             v-for="(col, ci) in columns"

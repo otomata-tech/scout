@@ -14,8 +14,10 @@ export interface MissionConfig {
   themeUrl?: string;
   /** Brand assets */
   branding: BrandingConfig;
-  /** Sidebar navigation items */
-  navItems: NavItem[];
+  /** Sidebar navigation items (flat — rendered as a single "Pipeline" section) */
+  navItems?: NavItem[];
+  /** Sidebar navigation sections (takes precedence over navItems) */
+  navSections?: NavSection[];
   /** Vue Router routes for this mission */
   routes: RouteRecordRaw[];
   /** Component rendered at the bottom of the sidebar (e.g. user menu / logout) */
@@ -27,6 +29,11 @@ export interface BrandingConfig {
   logoText?: string;
   subtitle?: string;
   faviconUrl?: string;
+}
+
+export interface NavSection {
+  label: string;
+  items: NavItem[];
 }
 
 export interface NavItem {

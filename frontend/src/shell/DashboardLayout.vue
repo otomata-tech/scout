@@ -12,15 +12,12 @@ defineProps<{
 
 <template>
   <div class="scout-app">
-    <SidebarNav :items="mission.navItems" :branding="mission.branding" :footer-component="mission.sidebarFooter">
+    <SidebarNav :items="mission.navItems" :sections="mission.navSections" :branding="mission.branding" :footer-component="mission.sidebarFooter">
       <template #switcher>
         <slot name="sidebar-switcher" />
       </template>
       <template #footer>
-        <slot name="sidebar-footer">
-          <div><span class="dot" />zoho · cache 10 min</div>
-          <div class="mono">v0.3</div>
-        </slot>
+        <slot name="sidebar-footer" />
       </template>
     </SidebarNav>
 

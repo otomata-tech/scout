@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import type { Component } from "vue";
-import type { NavItem, BrandingConfig } from "../core/types";
+import type { NavItem, NavSection, BrandingConfig } from "../core/types";
 import { Icon } from "./Icons";
 
 const props = defineProps<{
-  items: NavItem[];
+  items?: NavItem[];
+  sections?: NavSection[];
   branding: BrandingConfig;
-  secondary?: { label: string; items: NavItem[] };
   footerComponent?: Component;
 }>();
 
@@ -25,6 +25,12 @@ const isActive = (path: string) => {
   if (path === "/") return route.path === "/";
   return route.path.startsWith(path);
 };
+
+const resolvedSections = computed<NavSection[]>(() => {
+  if (props.sections?.length) return props.sections;
+  if (props.items?.length) return [{ label: "Pipeline", items: props.items }];
+  return [];
+});
 </script>
 
 <template>
@@ -50,28 +56,10 @@ const isActive = (path: string) => {
     <slot name="switcher" />
 
     <nav>
-      <div class="section-label">Pipeline</div>
-      <RouterLink
-        v-for="item in items"
-        :key="item.path"
-        :to="item.path"
-        custom
-        v-slot="{ navigate }"
-      >
-        <a
-          :class="isActive(item.path) ? 'active' : ''"
-          @click="navigate"
-        >
-          <Icon v-if="item.icon" :name="item.icon" />
-          <span class="lbl">{{ item.label }}</span>
-          <span v-if="item.badge != null" class="badge">{{ item.badge }}</span>
-        </a>
-      </RouterLink>
-
-      <template v-if="secondary">
-        <div class="section-label">{{ secondary.label }}</div>
+      <template v-for="(section, i) in resolvedSections" :key="i">
+        <div class="section-label">{{ section.label }}</div>
         <RouterLink
-          v-for="item in secondary.items"
+          v-for="item in section.items"
           :key="item.path"
           :to="item.path"
           custom
@@ -88,9 +76,7 @@ const isActive = (path: string) => {
 
     <div class="foot">
       <component v-if="footerComponent" :is="footerComponent" />
-      <slot v-else name="footer">
-        <div><span class="dot" />live</div>
-      </slot>
+      <slot v-else name="footer" />
     </div>
   </aside>
 </template>
