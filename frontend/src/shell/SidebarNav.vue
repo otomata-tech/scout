@@ -23,13 +23,20 @@ const initials = props.branding.logoText
 
 const isActive = (path: string) => {
   if (path === "/") return route.path === "/";
-  return route.path.startsWith(path);
+  if (!route.path.startsWith(path)) return false;
+  return !allPaths.value.some((p) => p !== path && p.startsWith(path) && route.path.startsWith(p));
 };
 
 const resolvedSections = computed<NavSection[]>(() => {
   if (props.sections?.length) return props.sections;
   if (props.items?.length) return [{ label: "Pipeline", items: props.items }];
   return [];
+});
+
+const allPaths = computed(() => {
+  const paths: string[] = [];
+  for (const s of resolvedSections.value) for (const i of s.items) paths.push(i.path);
+  return paths;
 });
 </script>
 
