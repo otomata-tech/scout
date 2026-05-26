@@ -163,7 +163,43 @@ cd /data/agents/<projet>/local && claude    # Claude Code, DB locale
 - **GR** : `code/server/src/mcp/server.ts` — SERVER_INSTRUCTIONS minimal (~110 tokens)
 - **GR** : `/data/agents/generations-renouvelables/` — sandbox agent isolé
 
+## Sous-agents — permissions MCP
+
+Les sous-agents Claude Code héritent des MCPs authentifiés par OAuth de la session parente, **mais uniquement si les permissions sont dans `.claude/settings.json`** (pas `settings.local.json`).
+
+`settings.local.json` ne se propage pas aux sous-agents. Les approbations manuelles dans la conversation principale non plus.
+
+### Configuration requise
+
+Créer `.claude/settings.json` dans le sandbox agent (pas local) :
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_<PROJET>__*",
+      "mcp__claude_ai_OTO__*",
+      "WebSearch"
+    ]
+  }
+}
+```
+
+Configs connues :
+
+| Projet | Fichier | Wildcards |
+|---|---|---|
+| **Blitz** | `/data/agents/blitz/prod/.claude/settings.json` | `mcp__claude_ai_Blitz__*`, `mcp__claude_ai_OTO__*` |
+| **GR** | `/data/agents/generations-renouvelables/prod/.claude/settings.json` | `mcp__claude_ai_GR__*`, `mcp__claude_ai_OTO__*`, `WebSearch` |
+
+### Limites
+
+- OTO peut se déconnecter au-delà de 6-8 agents simultanés — 10 agents ont tenu mais c'est la limite haute
+- `WebSearch` doit être explicitement autorisé si les agents en ont besoin (contacts LinkedIn)
+- Si un agent se fait bloquer par "permission denied" sur un tool MCP → vérifier `settings.json` en premier
+
 ## Changelog
 
+- **2026-05-27** : ajout section sous-agents permissions MCP — `settings.json` (pas local) requis, configs Blitz/GR, limites OTO.
 - **2026-05-24** : ajout taxonomie 3 types de tools, règle "toujours persister" (pas de flag persist), réponses légères (defaults 15, trim payloads), anti-patterns. Issu du refactor GR : retrait Kaspr/LinkedIn (→ Oto + add_contact persist-only), dedup INPI/BEGES, suppression flags persist sur probe_foncier et search_company_news, trimChainForMcp.
 - **2026-05-23** : version initiale — lazy-load doctrine, source de vérité unique, agent sandbox, nommage tools.
