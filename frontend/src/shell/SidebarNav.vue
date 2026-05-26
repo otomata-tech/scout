@@ -1,16 +1,21 @@
 <script setup lang="ts">
+import { ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
+import type { Component } from "vue";
 import type { NavItem, BrandingConfig } from "../core/types";
 import { Icon } from "./Icons";
 
 const props = defineProps<{
   items: NavItem[];
   branding: BrandingConfig;
-  /** Optional secondary section shown below the primary nav */
   secondary?: { label: string; items: NavItem[] };
+  footerComponent?: Component;
 }>();
 
 const route = useRoute();
+const open = ref(false);
+
+watch(() => route.path, () => { open.value = false; });
 
 const initials = props.branding.logoText
   ? props.branding.logoText.slice(0, 1).toUpperCase()
@@ -23,13 +28,23 @@ const isActive = (path: string) => {
 </script>
 
 <template>
-  <aside class="scout-side">
+  <button class="scout-hamburger" @click="open = !open" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <div v-if="open" class="scout-side-overlay" @click="open = false" />
+  <aside :class="['scout-side', { open }]">
     <div class="brand">
-      <div class="glyph">{{ initials }}</div>
-      <div class="meta">
-        <div class="name">{{ branding.logoText ?? "scout" }}</div>
-        <div v-if="branding.subtitle" class="sub">{{ branding.subtitle }}</div>
-      </div>
+      <template v-if="branding.logoUrl">
+        <img :src="branding.logoUrl" :alt="branding.logoText ?? 'logo'" class="brand-logo" />
+        <div v-if="branding.subtitle" class="sub" style="margin-left: auto; font-size: 10px;">{{ branding.subtitle }}</div>
+      </template>
+      <template v-else>
+        <div class="glyph">{{ initials }}</div>
+        <div class="meta">
+          <div class="name">{{ branding.logoText ?? "scout" }}</div>
+          <div v-if="branding.subtitle" class="sub">{{ branding.subtitle }}</div>
+        </div>
+      </template>
     </div>
 
     <slot name="switcher" />
@@ -72,7 +87,8 @@ const isActive = (path: string) => {
     </nav>
 
     <div class="foot">
-      <slot name="footer">
+      <component v-if="footerComponent" :is="footerComponent" />
+      <slot v-else name="footer">
         <div><span class="dot" />live</div>
       </slot>
     </div>
