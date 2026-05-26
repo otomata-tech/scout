@@ -129,7 +129,7 @@ L'agent d'exploration vit dans un dossier séparé du code source :
 
 ### Deux environnements : local et prod
 
-Le sandbox se décline en deux sous-dossiers pour cibler des DB différentes :
+Le sandbox se décline en deux sous-dossiers :
 
 ```
 /data/agents/<projet>/
@@ -138,39 +138,19 @@ Le sandbox se décline en deux sous-dossiers pour cibler des DB différentes :
 ├── local/
 │   ├── CLAUDE.md → ../CLAUDE.md
 │   ├── .claude/  → ../.claude/
-│   └── .mcp.json          # MCP stdio → DB locale (ex localhost:5432)
+│   └── .mcp.json          # MCP stdio → DB locale
 └── prod/
-    ├── CLAUDE.md → ../CLAUDE.md
     ├── .claude/  → ../.claude/
-    ├── .mcp.json          # MCP stdio → DB prod via tunnel SSH
-    └── start-tunnel.sh    # ouvre le tunnel avant usage
+    └── CLAUDE.md           # pour claude.ai (MCP HTTP prod, pas de stdio)
 ```
 
-Le MCP tourne en **stdio local** dans les deux cas (même code serveur, même registry de tools). Seul `DATABASE_URL` change, injecté via le champ `env` du `.mcp.json` :
+**local/** : Claude Code + MCP stdio + DB locale. L'agent tourne en CLI avec accès filesystem.
 
-```json
-{
-  "mcpServers": {
-    "gr-prod": {
-      "command": "node",
-      "args": ["--env-file=.env", "--import", "tsx", "src/mcp/server-stdio.ts"],
-      "cwd": "/data/missions/<projet>/server",
-      "env": {
-        "DATABASE_URL": "postgres://user:pass@localhost:<tunnel_port>/db?sslmode=require"
-      }
-    }
-  }
-}
-```
-
-Le `env` du `.mcp.json` override le `DATABASE_URL` du `.env` fichier. Le serveur stdio se connecte à la DB tunnelée comme s'il était local.
-
-**Tunnel SSH** (`start-tunnel.sh`) : forward du port de la DB managed vers localhost. À lancer avant `claude`. Le script vérifie si le port est déjà ouvert (idempotent).
+**prod/** : claude.ai + MCP HTTP distant (OAuth Logto). Pas de `.mcp.json`, pas de tunnel SSH — l'agent tourne sur claude.ai et se connecte au MCP prod directement. Le CLAUDE.md prod dit juste "appelle `get_claude_md()`".
 
 **Usage** :
 ```bash
-cd /data/agents/<projet>/local && claude    # DB locale
-cd /data/agents/<projet>/prod && ./start-tunnel.sh && claude  # DB prod
+cd /data/agents/<projet>/local && claude    # Claude Code, DB locale
 ```
 
 **Sync local → prod** : script dédié (`sync_db_to_prod.ts`) qui pipe COPY delta via SSH bastion. Mode `delta-by-id` (MAX(id) prod, exporte seulement les rows plus récentes). Pas de dump/restore, pas de fichier intermédiaire.
