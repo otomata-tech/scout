@@ -148,6 +148,11 @@ a { color: inherit; text-decoration: none; }
   .scout-main { padding-top: 48px; }
 }
 
+/* ───── Responsive column hiding ────────────────────────────── */
+@media (max-width: 640px)  { .hide-sm { display: none !important; } }
+@media (max-width: 900px)  { .hide-md { display: none !important; } }
+@media (max-width: 1200px) { .hide-lg { display: none !important; } }
+
 /* ───── Sidebar ───────────────────────────────────────────── */
 .scout-side {
   background: var(--scout-elev);

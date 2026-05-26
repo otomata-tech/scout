@@ -59,7 +59,7 @@ function cellValue(row: T, col: ColumnDef<T>): string {
           <th
             v-for="col in columns"
             :key="col.key"
-            :class="col.align === 'right' ? 'r' : ''"
+            :class="[col.align === 'right' ? 'r' : '', col.cellClass ?? '']"
             :style="col.width ? { width: col.width } : undefined"
           >{{ col.label }}</th>
         </tr>
