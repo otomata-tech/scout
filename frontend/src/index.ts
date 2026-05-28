@@ -1,5 +1,5 @@
 // Core
-export type { MissionConfig, BrandingConfig, NavItem, NavSection, ThemeTokens, IconComponent } from "./core/types";
+export type { MissionConfig, BrandingConfig, NavItem, NavSection, ThemeTokens, IconComponent, SearchResult, SearchProvider } from "./core/types";
 export { loadMissionTheme, applyBranding, applyThemeAttribute } from "./core/theme";
 export { mountShell, type MountOptions } from "./core/mount";
 export {
@@ -16,6 +16,7 @@ export { default as ShellApp } from "./shell/ShellApp.vue";
 export { default as DashboardLayout } from "./shell/DashboardLayout.vue";
 export { default as SidebarNav } from "./shell/SidebarNav.vue";
 export { default as Header } from "./shell/Header.vue";
+export { default as CommandPalette } from "./shell/CommandPalette.vue";
 
 // Shell — primitives
 export { default as StatCard } from "./shell/StatCard.vue";

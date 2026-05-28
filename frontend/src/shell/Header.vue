@@ -9,6 +9,8 @@ defineProps<{
   /** Optional command bar placeholder (⌘K). Hidden when empty. */
   searchPlaceholder?: string;
 }>();
+
+const emit = defineEmits<{ (e: "open-search"): void }>();
 </script>
 
 <template>
@@ -21,11 +23,16 @@ defineProps<{
       </template>
     </div>
 
-    <div v-if="searchPlaceholder !== ''" class="cmdbar">
+    <button
+      v-if="searchPlaceholder !== ''"
+      type="button"
+      class="cmdbar"
+      @click="emit('open-search')"
+    >
       <Icon name="search" />
       <span>{{ searchPlaceholder ?? "Search…" }}</span>
       <span class="kbd">⌘ K</span>
-    </div>
+    </button>
 
     <div class="actions">
       <slot />

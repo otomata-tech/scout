@@ -325,6 +325,8 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid transparent;
   color: var(--scout-mute);
   font-size: 13px;
+  font-family: inherit;
+  text-align: left;
   max-width: 480px;
   min-width: 0;
   cursor: text;

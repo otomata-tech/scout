@@ -22,7 +22,36 @@ export interface MissionConfig {
   routes: RouteRecordRaw[];
   /** Component rendered at the bottom of the sidebar (e.g. user menu / logout) */
   sidebarFooter?: Component;
+  /**
+   * Search provider backing the header command palette (⌘K).
+   * The mission queries its own data sources and returns navigable results.
+   * When omitted, the command bar is not rendered.
+   */
+  search?: SearchProvider;
 }
+
+/** A single hit returned by a mission's {@link SearchProvider}. */
+export interface SearchResult {
+  /** Stable unique key (used for :key and de-duplication) */
+  id: string;
+  /** Primary label */
+  title: string;
+  /** Optional secondary line (siren, account, status…) */
+  subtitle?: string;
+  /** Group header the result is filed under (e.g. "Leads", "Deals") */
+  group: string;
+  /** Router path to navigate to on select */
+  to: string;
+  /** Optional scout icon name (see Icons.ts) */
+  icon?: string;
+}
+
+/**
+ * Resolves a free-text query to a flat list of results.
+ * Called debounced by the command palette; should be cancellation-tolerant
+ * (the palette ignores results from stale queries).
+ */
+export type SearchProvider = (query: string) => Promise<SearchResult[]>;
 
 export interface BrandingConfig {
   logoUrl?: string;

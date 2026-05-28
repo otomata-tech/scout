@@ -8,6 +8,8 @@ defineProps<{
   breadcrumbs?: string[];
   searchPlaceholder?: string;
 }>();
+
+const emit = defineEmits<{ (e: "open-search"): void }>();
 </script>
 
 <template>
@@ -26,6 +28,7 @@ defineProps<{
         :mission-name="mission.branding.logoText"
         :breadcrumbs="breadcrumbs"
         :search-placeholder="searchPlaceholder"
+        @open-search="emit('open-search')"
       >
         <slot name="header-actions" />
       </Header>
