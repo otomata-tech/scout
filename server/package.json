@@ -1,6 +1,6 @@
 {
   "name": "@otomata/scout-server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Server-side shell for scout : Fastify plugins, Logto JWT, in-memory cache, generic OAuth refresh.",
   "type": "module",
   "main": "./src/index.ts",
@@ -10,7 +10,18 @@
     "./cache": "./src/cache.ts",
     "./auth": "./src/auth.ts",
     "./oauth": "./src/oauth.ts",
-    "./build-app": "./src/build-app.ts"
+    "./build-app": "./src/build-app.ts",
+    "./db": "./src/db.ts",
+    "./mcp": "./src/mcp.ts",
+    "./services/recherche-entreprises": "./src/services/recherche-entreprises.ts",
+    "./services/kaspr": "./src/services/kaspr.ts",
+    "./services/fullenrich": "./src/services/fullenrich.ts",
+    "./services/logto": "./src/services/logto.ts",
+    "./services/access": "./src/services/access.ts",
+    "./services/api-tokens": "./src/services/api-tokens.ts",
+    "./services/provider-calls": "./src/services/provider-calls.ts",
+    "./services/claude-md": "./src/services/claude-md.ts",
+    "./services/mailer": "./src/services/mailer.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
@@ -22,7 +33,13 @@
     "@fastify/swagger-ui": "^5.0.0",
     "fastify-type-provider-zod": "^4.0.0",
     "jose": "^5.0.0",
-    "zod": "^3.0.0"
+    "zod": "^3.0.0",
+    "postgres": "^3.4.0",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "postgres": { "optional": true },
+    "@modelcontextprotocol/sdk": { "optional": true }
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
@@ -33,6 +50,8 @@
     "@fastify/swagger-ui": "^5.2.6",
     "fastify-type-provider-zod": "^4.0.2",
     "jose": "^5.9.6",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "postgres": "^3.4.5",
+    "@modelcontextprotocol/sdk": "^1.0.4"
   }
 }

@@ -61,6 +61,38 @@ await app.listen({ port: 8092 });
 
 Each mission plugin is mounted under `/api/missions/<id>/`. The scout shell registers core plugins (cors, swagger, swagger-ui, auth preHandler).
 
+## Transverse services (generic, opt-in)
+
+Beyond the chassis, scout ships generic transverse services as **factories** that
+the consumer wires with its own deps (DB connection, API keys, config). scout owns
+no DB connection and reads no `process.env` — the consumer injects everything.
+
+| Subpath export | Factory / API | Injected deps |
+|---|---|---|
+| `@otomata/scout-server/db` | `createScoutDb(url)` → `sql` (camelCase + ISO dates) | `DATABASE_URL` |
+| `@otomata/scout-server/services/recherche-entreprises` | `search`, `getBySiren` (open data, stateless) | — |
+| `@otomata/scout-server/services/kaspr` | `makeKaspr({ apiKey, onCall })` | API key, log hook |
+| `@otomata/scout-server/services/fullenrich` | `makeFullenrich({ apiKey, onCall, batchPrefix })` | API key, log hook |
+| `@otomata/scout-server/services/provider-calls` | `makeProviderCalls(sql)` → `log/stats/recent` | `sql` |
+| `@otomata/scout-server/services/logto` | `makeLogtoClient(cfg)` (Management API) | Logto M2M config |
+| `@otomata/scout-server/services/access` | `makeAccess({ adminRole, enabled, getUserInfo })` | role name, `getUserInfo` |
+| `@otomata/scout-server/services/api-tokens` | `makeApiTokens(sql, { prefix })` | `sql` |
+| `@otomata/scout-server/services/claude-md` | `makeClaudeMd(sql, { key })` | `sql` |
+| `@otomata/scout-server/services/mailer` | `makeMailer({ apiKey, from })` (Resend) | API key, from |
+| `@otomata/scout-server/mcp` | `makeMcpRoutes({ buildServer, publicBaseUrl, logtoEndpoint })` | MCP server factory |
+
+`postgres` and `@modelcontextprotocol/sdk` are **optional** peer deps — only needed
+if the consumer uses the DB-backed services or the MCP route factory.
+
+DB-backed services assume their tables exist in the consumer's schema (`provider_calls`,
+`api_tokens`, `settings`); each factory's docblock carries the expected DDL. Mission
+branding (email templates, MCP instructions/tools) stays in the consumer.
+
+The frontend ships the same way : generic composables (`useAuth`, `usePwaInstall`,
+`useSwipeNav`, `useTabIndicator`), `renderMarkdown`, and the `AuthCallback` view are
+exported from `@otomata/scout-frontend`. Logto config comes from the consumer's
+`VITE_LOGTO_*` env.
+
 ## Versioning
 
 - Pre-1.0 while the contract is fluid (≤ 2 consumer missions).

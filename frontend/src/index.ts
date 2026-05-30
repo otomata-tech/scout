@@ -34,8 +34,29 @@ export { default as FilterBar } from "./shell/FilterBar.vue";
 export { default as FilterGroup } from "./shell/FilterGroup.vue";
 export { default as CacheBadge } from "./shell/CacheBadge.vue";
 
+export { default as AuthCallback } from "./shell/AuthCallback.vue";
+
 // Icons
 export { Icon, iconExists } from "./shell/Icons";
 
 // Utils
 export { cn, formatNumber, formatPct, formatDate, ageLabel } from "./lib/utils";
+export { renderMarkdown } from "./lib/markdown";
+
+// Composables
+export {
+  isAuthEnabled,
+  isAuthenticated,
+  login,
+  logout,
+  handleCallback,
+  consumePostLoginPath,
+  getAccessToken,
+  getIdTokenClaims,
+  signInWithToken,
+  getClient,
+  type IdTokenClaims,
+} from "./composables/useAuth";
+export { usePwaInstall } from "./composables/usePwaInstall";
+export { useSwipeNav } from "./composables/useSwipeNav";
+export { useTabIndicator, type TabState } from "./composables/useTabIndicator";
