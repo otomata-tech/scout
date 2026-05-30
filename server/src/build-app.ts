@@ -7,6 +7,8 @@ import {
   validatorCompiler,
   jsonSchemaTransform,
 } from "fastify-type-provider-zod";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { makeAuthPreHandler, type LogtoAuthConfig } from "./auth.js";
 import { cacheStats, invalidate } from "./cache.js";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
@@ -17,12 +19,25 @@ export interface MissionPlugin {
   plugin: FastifyPluginAsync;
 }
 
+/** Plugin générique monté dans l'arbre authentifié à un préfixe libre (ex. /api/leads). */
+export interface CorePlugin {
+  prefix: string;
+  plugin: FastifyPluginAsync;
+}
+
 export interface ScoutAppConfig {
   apiTitle: string;
   apiVersion?: string;
   missions: MissionPlugin[];
   auth: LogtoAuthConfig;
   isTest?: boolean;
+  /** Plugins cœur (non-mission) montés sous /api/* dans l'arbre authentifié. */
+  corePlugins?: CorePlugin[];
+  /**
+   * Répertoire du build frontend à servir en statique (mono-process SaaS).
+   * Fallback SPA : toute route non-`/api` renvoie index.html. Absent → API seule.
+   */
+  staticDir?: string;
 }
 
 /**
@@ -51,6 +66,13 @@ export async function buildScoutApp(config: ScoutAppConfig): Promise<FastifyInst
   });
   await app.register(swaggerUi, { routePrefix: "/api/docs" });
 
+  // Public health endpoint (no auth) — liveness probe for the SaaS.
+  app.withTypeProvider<ZodTypeProvider>().get(
+    "/api/health",
+    { schema: { tags: ["health"], response: { 200: z.object({ ok: z.boolean() }) } } },
+    async () => ({ ok: true }),
+  );
+
   const authPreHandler = makeAuthPreHandler(config.auth);
 
   // Authenticated tree
@@ -60,6 +82,11 @@ export async function buildScoutApp(config: ScoutAppConfig): Promise<FastifyInst
     // Mission plugins under /api/missions/<id>
     for (const m of config.missions) {
       await scoped.register(m.plugin, { prefix: `/api/missions/${m.id}` });
+    }
+
+    // Core (non-mission) plugins under /api/* — e.g. the generic /api/leads product.
+    for (const c of config.corePlugins ?? []) {
+      await scoped.register(c.plugin, { prefix: c.prefix });
     }
 
     // Cache control (cross-mission)
@@ -97,6 +124,17 @@ export async function buildScoutApp(config: ScoutAppConfig): Promise<FastifyInst
       async ({ query }) => ({ invalidated: invalidate(query.prefix) })
     );
   });
+
+  // Static frontend (mono-process SaaS) : serve the built SPA + history fallback.
+  if (config.staticDir && existsSync(config.staticDir)) {
+    const staticDir = config.staticDir;
+    const fastifyStatic = (await import("@fastify/static")).default;
+    await app.register(fastifyStatic, { root: staticDir, wildcard: false });
+    app.setNotFoundHandler((req, reply) => {
+      if (req.url.startsWith("/api")) return reply.code(404).send({ error: "not-found" });
+      return reply.sendFile("index.html", staticDir);
+    });
+  }
 
   return app;
 }
