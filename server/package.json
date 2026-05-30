@@ -22,7 +22,10 @@
     "./services/api-tokens": "./src/services/api-tokens.ts",
     "./services/provider-calls": "./src/services/provider-calls.ts",
     "./services/claude-md": "./src/services/claude-md.ts",
-    "./services/mailer": "./src/services/mailer.ts"
+    "./services/mailer": "./src/services/mailer.ts",
+    "./services/entity-log": "./src/services/entity-log.ts",
+    "./services/claimable": "./src/services/claimable.ts",
+    "./services/waterfall": "./src/services/waterfall.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
