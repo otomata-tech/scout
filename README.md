@@ -80,6 +80,7 @@ no DB connection and reads no `process.env` — the consumer injects everything.
 | `@otomata/scout-server/services/claude-md` | `makeClaudeMd(sql, { key })` | `sql` |
 | `@otomata/scout-server/services/mailer` | `makeMailer({ apiKey, from })` (Resend) | API key, from |
 | `@otomata/scout-server/mcp` | `makeMcpRoutes({ buildServer, publicBaseUrl, logtoEndpoint })` | MCP server factory |
+| `@otomata/scout-server/mcp-server` | `buildScoutMcpServer({ name, version, instructions, register })` | mission tool registrars |
 
 `postgres` and `@modelcontextprotocol/sdk` are **optional** peer deps — only needed
 if the consumer uses the DB-backed services or the MCP route factory.

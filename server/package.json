@@ -13,6 +13,7 @@
     "./build-app": "./src/build-app.ts",
     "./db": "./src/db.ts",
     "./mcp": "./src/mcp.ts",
+    "./mcp-server": "./src/mcp-server.ts",
     "./services/recherche-entreprises": "./src/services/recherche-entreprises.ts",
     "./services/kaspr": "./src/services/kaspr.ts",
     "./services/fullenrich": "./src/services/fullenrich.ts",
