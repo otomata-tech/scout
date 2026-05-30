@@ -1,6 +1,38 @@
 # scout
 
-White-label shell for lead enrichment platforms. Used as a `file:` or npm dependency by mission-specific projects (1 instance per client).
+Lead-enrichment platform with two faces:
+
+1. **Standalone SaaS** — boots on its own (`npm run dev`), ships a generic lead
+   product (CRUD + exclusive claim + append-only log) over a clean `leads` table,
+   with auth, a Vue shell UI, and OpenAPI docs. See [Run standalone](#run-standalone).
+2. **White-label chassis** — the same two packages are consumed as `file:`/npm
+   deps by mission-specific projects (e.g. blitz/Movinmotion), which plug in their
+   own data adapters, views, theme and branding. scout knows nothing about any
+   specific mission.
+
+## Run standalone
+
+```bash
+# Server (API + serves the built frontend in one process)
+cd server
+cp .env.example .env            # set DATABASE_URL ; leave LOGTO_* empty for dev bypass
+npm install && npm run migrate  # creates leads, lead_logs, api_tokens, settings, provider_calls
+npm run dev                     # :8100 — /api/leads, /api/health, /api/docs
+
+# Frontend (dev, proxies /api → :8100)
+cd ../frontend && npm install && npm run dev   # :5190
+
+# Single-process production : build the front, point the server at it
+cd ../frontend && npm run build
+cd ../server && STATIC_DIR=../frontend/dist npm run build && npm start
+```
+
+Env (server): `DATABASE_URL` (required), `PORT` (8100), `STATIC_DIR` (serve built
+SPA), `LOGTO_ENDPOINT`/`LOGTO_AUDIENCE` (auth — empty ⇒ dev bypass), `API_TOKEN_PREFIX`.
+
+The generic lead model lives in `services/leads` (a `data jsonb` column carries
+any extra fields — no domain columns). A mission that needs typed columns keeps
+its own table and consumes the pure mechanisms (`claimable`, `entity-log`, …) instead.
 
 ## Contract
 

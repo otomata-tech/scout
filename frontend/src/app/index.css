@@ -1,0 +1,2 @@
+/* Standalone scout app stylesheet — pulls in the shell theme (which imports tailwind). */
+@import "@/assets/theme.css";
