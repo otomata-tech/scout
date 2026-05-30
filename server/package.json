@@ -23,6 +23,7 @@
     "./services/provider-calls": "./src/services/provider-calls.ts",
     "./services/claude-md": "./src/services/claude-md.ts",
     "./services/mailer": "./src/services/mailer.ts",
+    "./services/presence": "./src/services/presence.ts",
     "./services/entity-log": "./src/services/entity-log.ts",
     "./services/claimable": "./src/services/claimable.ts",
     "./services/waterfall": "./src/services/waterfall.ts"

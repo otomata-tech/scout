@@ -84,6 +84,7 @@ no DB connection and reads no `process.env` — the consumer injects everything.
 | `@otomata/scout-server/services/entity-log` | `makeEntityLog(sql, { table, keyColumn })` | `sql` |
 | `@otomata/scout-server/services/claimable` | `makeClaimable(sql, { table, keyColumn })` (exclusive lock) | `sql` |
 | `@otomata/scout-server/services/waterfall` | `makeWaterfall({ skipWindowDays }).run(providers)` (provider strategy) | provider closures |
+| `@otomata/scout-server/services/presence` | `makePresence({ ttlMs })` → `ping/leave/viewers` (in-memory live presence) | — |
 
 `postgres` and `@modelcontextprotocol/sdk` are **optional** peer deps — only needed
 if the consumer uses the DB-backed services or the MCP route factory.
