@@ -10,14 +10,19 @@ import { config } from "./config.js";
 import { createScoutDb } from "./db.js";
 import { buildScoutApp } from "./build-app.js";
 import { makeApiTokens } from "./services/api-tokens.js";
+import { makeClaudeMd } from "./services/claude-md.js";
+import { makeProviderCalls } from "./services/provider-calls.js";
 import { makeLeads } from "./services/leads.js";
 import { makeClaimable } from "./services/claimable.js";
 import { makeEntityLog } from "./services/entity-log.js";
 import { makeLeadsRoutes } from "./routes/leads.js";
+import { makeAdminRoutes } from "./routes/admin.js";
 
 export async function buildApp() {
   const sql = createScoutDb(config.databaseUrl);
   const apiTokens = makeApiTokens(sql, { prefix: config.apiTokenPrefix });
+  const claudeMd = makeClaudeMd(sql);
+  const providerCalls = makeProviderCalls(sql);
 
   // Produit lead générique : service CRUD + verrou + journal, câblés sur sql.
   const leads = makeLeads(sql);
@@ -34,7 +39,10 @@ export async function buildApp() {
       tokenVerifier: apiTokens.verify,
     },
     missions: [],
-    corePlugins: [{ prefix: "/api/leads", plugin: makeLeadsRoutes({ leads, lock, logs }) }],
+    corePlugins: [
+      { prefix: "/api/leads", plugin: makeLeadsRoutes({ leads, lock, logs }) },
+      { prefix: "/api/admin", plugin: makeAdminRoutes({ apiTokens, claudeMd, providerCalls }) },
+    ],
     staticDir: config.staticDir,
   });
 

@@ -50,3 +50,62 @@ export const leadsApi = {
 };
 
 export const LEAD_STATUSES = ["new", "qualified", "contacted", "won", "lost"] as const;
+
+// ── Admin ──────────────────────────────────────────────────────
+export interface ApiTokenRow {
+  id: number;
+  name: string;
+  lastUsedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+}
+
+export interface ProviderStat {
+  provider: string;
+  totalCalls: number;
+  successCalls: number;
+  totalPhones: number;
+  totalEmails: number;
+  totalCredits: number | null;
+  hitRate: number;
+}
+
+export interface ProviderCallRow {
+  id: number;
+  provider: string;
+  siren: string | null;
+  contactId: number | null;
+  linkedinSlug: string | null;
+  success: boolean;
+  phonesFound: number;
+  emailsFound: number;
+  creditsUsed: number | null;
+  error: string | null;
+  createdAt: string;
+}
+
+const ADMIN = "/api/admin";
+
+export const adminApi = {
+  me: () => client.call<{ sub: string; name: string | null }>(`${ADMIN}/me`),
+  tokens: () => client.call<ApiTokenRow[]>(`${ADMIN}/api-tokens`),
+  createToken: (name: string) =>
+    client.call<{ id: number; token: string }>(`${ADMIN}/api-tokens`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name }),
+    }),
+  revokeToken: (id: number) => client.call<{ revoked: boolean }>(`${ADMIN}/api-tokens/${id}`, { method: "DELETE" }),
+  getDoctrine: () => client.call<{ content: string }>(`${ADMIN}/claude-md`),
+  setDoctrine: (content: string) =>
+    client.call<{ ok: boolean; length: number }>(`${ADMIN}/claude-md`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ content }),
+    }),
+  providerStats: (days?: number) =>
+    client.call<{ stats: ProviderStat[] }>(`${ADMIN}/provider-calls/stats${days ? `?days=${days}` : ""}`),
+  providerRecent: (limit?: number) =>
+    client.call<{ calls: ProviderCallRow[] }>(`${ADMIN}/provider-calls/recent${limit ? `?limit=${limit}` : ""}`),
+};

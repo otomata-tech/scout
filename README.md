@@ -17,7 +17,7 @@ Lead-enrichment platform with two faces:
 cd server
 cp .env.example .env            # set DATABASE_URL ; leave LOGTO_* empty for dev bypass
 npm install && npm run migrate  # creates leads, lead_logs, api_tokens, settings, provider_calls
-npm run dev                     # :8100 — /api/leads, /api/health, /api/docs
+npm run dev                     # :8100 — /api/leads, /api/admin, /api/health, /api/docs
 
 # Frontend (dev, proxies /api → :8100)
 cd ../frontend && npm install && npm run dev   # :5190
@@ -33,6 +33,11 @@ SPA), `LOGTO_ENDPOINT`/`LOGTO_AUDIENCE` (auth — empty ⇒ dev bypass), `API_TO
 The generic lead model lives in `services/leads` (a `data jsonb` column carries
 any extra fields — no domain columns). A mission that needs typed columns keeps
 its own table and consumes the pure mechanisms (`claimable`, `entity-log`, …) instead.
+
+`/api/admin` exposes generic admin over the built-in services: personal API
+tokens (create/list/revoke — a created token authenticates subsequent requests),
+MCP doctrine editing (`settings.claude_md`), and enrichment provider cost stats.
+It sits in the authenticated tree; admin-role gating (Logto) is a follow-up.
 
 ## Contract
 
